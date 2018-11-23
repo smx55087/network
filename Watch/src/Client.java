@@ -15,12 +15,13 @@ import com.sun.image.codec.jpeg.JPEGImageEncoder;
 public class Client extends Thread{
 
 	private Socket socket = null;
-	private ByteArrayOutputStream  baos = null;
-	private DataOutputStream dos =null;
+	private BufferedImage image;
+	
+	
 	public Client(){
 		  System.out.println("正在连接服务器");
 		   try {
-		    socket = new Socket("192.168.43.204",8989);
+		    socket = new Socket("192.168.0.106",8989);
 		   } catch (Exception e) {
 			   System.out.println("找不到服务器....");
 			   e.printStackTrace();
@@ -37,13 +38,11 @@ public class Client extends Thread{
 	   try {
 		Thread.sleep(100);
 	    System.out.println(i++);
-	    BufferedImage image = getDeskTop();
+	    image = getDeskTop();
 	    sendImage(image);
-	    image=null;
-	    System.gc();
 	   } catch (Exception e) {
-	    Utils.close(dos,baos,socket);
-	    return;
+	
+	    e.printStackTrace();
 	   }
 	  }
 	}
@@ -59,9 +58,9 @@ public class Client extends Thread{
 	
 	public void sendImage(BufferedImage image)throws Exception
 	{
-		baos= new ByteArrayOutputStream(); 
+		ByteArrayOutputStream  baos= new ByteArrayOutputStream(); 
 	    ImageIO.write(image,"jpg",baos);
-	    dos =new DataOutputStream(socket.getOutputStream());
+	    DataOutputStream dos=new DataOutputStream(socket.getOutputStream());
 	    byte[] data = baos.toByteArray();
 		dos.writeInt(data.length);
 		dos.write(data);
@@ -71,6 +70,8 @@ public class Client extends Thread{
 	
 	public static void main(String[] args)throws Exception
 	{
-		new Thread(new Client()).start();
+		Client client = new Client();
+		new Thread(client).start();
+		
 	}
 }
